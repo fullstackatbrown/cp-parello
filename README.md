@@ -1,11 +1,7 @@
 /home
-
   ├── frontend
-  
   │   └── src   # React + TypeScript for you to edit!
-  
   ├── backend
-  
   │   └── src   # Flask code for you to edit!
 
 
