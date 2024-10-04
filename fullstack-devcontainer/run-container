@@ -1,0 +1,100 @@
+#! /bin/bash
+
+maindir=""
+
+fresh=
+persistent=
+persistent_name=fullstack-persistent
+arch=`uname -m`
+tag=
+platform=
+
+if test "$arch" = "arm64" -o "$arch" = "aarch64"; then
+    platform=linux/arm64
+    tag=fullstack:arm64
+else
+    platform=linux/amd64
+    tag=fullstack:latest
+fi
+
+while test "$#" -ne 0; do
+    if test "$1" = "-f" -o "$1" = "--fresh"; then
+        fresh=1
+        shift
+    elif test "$1" = "-p" -o "$1" = "--persistent"; then
+        persistent=1
+        shift
+    else
+        echo "Usage: run-container [-f|--fresh][-p|--persistent]" 1>&2
+        exit 1
+    fi
+done
+
+if stat --format %i / >/dev/null 2>&1; then
+    statformatarg="--format"
+else
+    statformatarg="-f"
+fi
+myfileid=`stat $statformatarg %d:%i "${BASH_SOURCE[0]}" 2>/dev/null`
+
+dir="`pwd`"
+while test "$dir" != / -a "$dir" != ""; do
+    thisfileid=`stat $statformatarg %d:%i "$dir"/run-container 2>/dev/null`
+    if test -n "$thisfileid" -a "$thisfileid" = "$myfileid"; then
+        maindir="$dir"
+        break
+    fi
+    dir="`dirname "$dir"`"
+done
+
+if test -z "$maindir" && expr "${BASH_SOURCE[0]}" : / >/dev/null 2>&1; then
+    maindir="`dirname "${BASH_SOURCE[0]}"`"
+fi
+
+ssharg=
+sshenvarg=
+if test -n "$SSH_AUTH_SOCK" -a "`uname`" = Darwin; then
+    ssharg=" --mount type=bind,src=/run/host-services/ssh-auth.sock,target=/run/host-services/ssh-auth.sock"
+    sshenvarg=" -e SSH_AUTH_SOCK=/run/host-services/ssh-auth.sock"
+fi
+
+if test -z "$fresh"; then
+    if test -n "$persistent"; then
+        existing_image="`docker ps -f status=exited -f name=$persistent_name --no-trunc --format "{{.CreatedAt}},{{.ID}}" | sort -r | head -n 1`"
+        if test -n "$existing_image"; then
+            created_at="`echo $existing_image | sed 's/,.*//'`"
+            image="`echo $existing_image | sed 's/^.*,//'`"
+            image12="`echo $image | head -c 12`"
+            echo "* Using existing container $image12, created $created_at" 1>&2
+            echo "- To create a new container, exit then \`run-container -p -f\`" 1>&2
+            echo "- To kill this container, exit then \`docker kill $image12\`" 1>&2
+            exec docker start -ai $image
+        fi
+    fi
+    existing_image="`docker ps -f status=running -f ancestor=$tag --no-trunc --format "{{.CreatedAt}},{{.ID}}" | sort -r | head -n 1`"
+    if test -n "$existing_image"; then
+        created_at="`echo $existing_image | sed 's/,.*//'`"
+        image="`echo $existing_image | sed 's/^.*,//'`"
+        image12="`echo $image | head -c 12`"
+        echo "* Using running container $image12, created $created_at" 1>&2
+        echo "- To start a new container, exit then \`run-container -f\`" 1>&2
+        echo "- To kill this container, exit then \`docker kill $image12\`" 1>&2
+        exec docker exec -it$sshenvarg $image /bin/bash
+    fi
+    
+fi
+
+if test -n "$persistent"; then
+    existing_image="`docker ps -f status=exited -f name=$persistent_name --no-trunc --format "{{.CreatedAt}},{{.ID}}" | sort -r | head -n 1`"
+    if test -n "$existing_image"; then
+        created_at="`echo $existing_image | sed 's/,.*//'`"
+        image="`echo $existing_image | sed 's/^.*,//'`"
+        image12="`echo $image | head -c 12`"
+        echo "* Removing existing container $image12, created $created_at" 1>&2
+        echo "- Starting new persistent container" 1>&2
+        `docker rm $image` 2>/dev/null
+    fi
+    exec docker run -it --platform $platform --name $persistent_name --privileged --cap-add=SYS_PTRACE --cap-add=NET_ADMIN --security-opt seccomp=unconfined -v "$maindir/home":/home/fullstack-user $ssharg -w "/home/fullstack-user" $sshenvarg -p 127.0.0.1:5173:5173 $tag
+fi
+
+exec docker run -it --platform $platform --rm --privileged --cap-add=SYS_PTRACE --cap-add=NET_ADMIN --security-opt seccomp=unconfined -v "$maindir/home":/home/fullstack-user $ssharg -w "/home/fullstack-user" $sshenvarg -p 127.0.0.1:5173:5173 $tag
