@@ -1,13 +1,17 @@
-    /home
-      ├── frontend
-      │   └── src   # React + TypeScript for you to edit!
-      ├── backend
-      │   └── src   # Flask code for you to edit!
+    /fullstack-devcontainer
+        run-container           # Run this script after building to enter docker container
+        /docker
+          ├── build-container   # Run this script to build docker container
+        /home
+          ├── frontend
+          │   └── src   # React + TypeScript for you to edit!
+          ├── backend
+          │   └── src   # Flask code for you to edit!
 
 
 When it comes to running the code, first download docker. Once you have downloaded
 Docker, start the deamon and run ./build-container. This only has to be done once.
-After running this command, run ./start-container. 
+After running this command, run ./start-container to enter the container. 
 
 To run frontend code, do npm run dev while in the frontend folder. You can open up
 a browser and should be able to see the website on http://localhost:5173
