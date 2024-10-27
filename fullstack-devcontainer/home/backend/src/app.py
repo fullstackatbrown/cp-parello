@@ -270,3 +270,35 @@ with app.app_context():
 
 if __name__ == '__main__':
     app.run()
+
+
+
+#-------------------------------------------------------------------------------
+
+# Initialize grid state
+grid_state = [0] * (64 * 256)
+
+@app.route('/api/updateGrid', methods=['POST'])
+def update_grid():
+    data = request.json
+    x = data.get('x')
+    y = data.get('y')
+    on = data.get('on')
+    index = min(y, 63) * 256 + min(255, x)
+    if 0 <= index < len(grid_state):
+        grid_state[index] = on
+        return jsonify({"status": "success"}), 200
+    return jsonify({"status": "error", "message": "Invalid index"}), 400
+
+@app.route('/api/clearGrid', methods=['POST'])
+def clear_grid():
+    global grid_state
+    grid_state = [0] * (64 * 256)
+    return jsonify({"status": "success"}), 200
+
+@app.route('/api/getGrid', methods=['GET'])
+def get_grid():
+    return jsonify({"grid": grid_state}), 200
+
+if __name__ == '__main__':
+    app.run(debug=True)
