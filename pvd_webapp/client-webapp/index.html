@@ -7,7 +7,20 @@
     <title>Vite + React + TS</title>
   </head>
   <body>
+    <div>
+        <div id="gridContainer" style="display: grid; grid-template-columns: repeat(256, 5px);"></div>
+        <div id="blocklyDiv" style="height: 60vh; width: 75vw;"></div>  
+    </div>
+
     <div id="root"></div>
+    
     <script type="module" src="/src/main.tsx"></script>
+    <script src="https://unpkg.com/blockly/blockly.min.js"></script>
+    <script src="https://unpkg.com/blockly/python_compressed.js"></script>
+    <script src="https://unpkg.com/blockly/msg/en.js"></script>
+    
+    <script type="module" src="./static/js/toolbox.js"></script>
+    <script type="module" src="./static/js/run-blockly.js"></script>
   </body>
 </html>
+

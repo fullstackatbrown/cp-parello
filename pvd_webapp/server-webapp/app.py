@@ -1,7 +1,9 @@
 import requests
 import json
 import ephem
-from flask import Flask
+from flask import Flask, render_template, request
+import os
+import json
 
 # from ephem import degree
 
@@ -35,3 +37,21 @@ def get_telemetry():
         "longitude": iss.sublong / ephem.degree,
         "end": time
     }
+
+grid = [[False for _ in range(256)] for _ in range(64)]
+
+def set_pixel(x, y, on):
+    grid[y][x] = False if on == 'FALSE' else True
+
+@app.route('/updateGrid')
+def updateGrid():
+    global grid
+    grid = [[False for _ in range(256)] for _ in range(64)]
+    code = request.args.get('code')
+    exec(code)
+    return json.dumps({"status": "success"})
+
+@app.route('/fetchGrid')
+def getGrid():
+    return json.dumps({"grid": grid})
+
