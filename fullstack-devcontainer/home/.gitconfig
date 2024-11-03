@@ -1,0 +1,10 @@
+[user]
+	name = Alex Khosrowshahi
+	email = alexander_khosrowshahi@brown.edu
+[credential]
+	helper = "!f() { /home/fullstack-user/.vscode-server/bin/384ff7382de624fb94dbaf6da11977bba1ecd427/node /tmp/vscode-remote-containers-d7786e8f-d843-4202-bc39-92793c92adae.js git-credential-helper $*; }; f"
+[filter "lfs"]
+	process = git-lfs filter-process
+	required = true
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f

@@ -1,0 +1,18 @@
+0 verbose cli /usr/bin/node /usr/bin/npm
+1 info using npm@10.9.0
+2 info using node@v22.10.0
+3 silly config load:file:/usr/lib/node_modules/npm/npmrc
+4 silly config load:file:/home/fullstack-user/frontend/.npmrc
+5 silly config load:file:/home/fullstack-user/.npmrc
+6 silly config load:file:/usr/etc/npmrc
+7 verbose title npm run build
+8 verbose argv "run" "build"
+9 verbose logfile logs-max:10 dir:/home/fullstack-user/.npm/_logs/2024-11-03T17_26_06_380Z-
+10 verbose logfile /home/fullstack-user/.npm/_logs/2024-11-03T17_26_06_380Z-debug-0.log
+11 silly logfile done cleaning log files
+12 verbose cwd /home/fullstack-user/frontend
+13 verbose os Linux 5.15.153.1-microsoft-standard-WSL2
+14 verbose node v22.10.0
+15 verbose npm  v10.9.0
+16 verbose exit 1
+17 verbose code 1
