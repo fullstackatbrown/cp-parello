@@ -1,9 +1,10 @@
 import requests
 import json
 import ephem
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 import os
 import json
+from flask_cors import CORS
 
 # from ephem import degree
 
@@ -14,6 +15,7 @@ URL = 'https://network.satnogs.org/api/observations/?id=&status=&ground_station=
 #print(iss.sublong / ephem.degree)
 
 app = Flask(__name__)
+CORS(app)
 
 @app.route("/")
 def hello_world():
@@ -40,18 +42,14 @@ def get_telemetry():
 
 grid = [[False for _ in range(256)] for _ in range(64)]
 
-def set_pixel(x, y, on):
-    grid[y][x] = False if on == 'FALSE' else True
+@app.route('/process_xml', methods=['POST'])
+def process_xml():
+    data = request.json
+    xml_data = data.get('xml', '')
 
-@app.route('/updateGrid')
-def updateGrid():
-    global grid
-    grid = [[False for _ in range(256)] for _ in range(64)]
-    code = request.args.get('code')
-    exec(code)
-    return json.dumps({"status": "success"})
+    # Process XML data here if needed
+    # For now, just send back a simple confirmation message
+    return jsonify({"message": "Received XML data", "xml": xml_data})
 
-@app.route('/fetchGrid')
-def getGrid():
-    return json.dumps({"grid": grid})
-
+if __name__ == '__main__':
+    app.run(debug=True)
