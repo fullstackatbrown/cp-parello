@@ -1,6 +1,9 @@
 import React, { useEffect, useRef } from 'react';
 import * as Blockly from 'blockly';
 import { WorkspaceSvg } from 'blockly';
+import { motion } from 'framer-motion';
+import { darkTheme, workspaceConfig } from './blocklyTheme';
+import { blocklyStyles } from './blocklyStyles';
 
 interface BlocklyComponentProps {
   initialXml: string;
@@ -17,78 +20,70 @@ const BlocklyComponent: React.FC<BlocklyComponentProps> = ({
   const workspaceRef = useRef<WorkspaceSvg | null>(null);
 
   useEffect(() => {
-    if (!blocklyDiv.current || workspaceRef.current) {
-      return;
-    }
+    if (!blocklyDiv.current || workspaceRef.current) return;
 
     try {
-      console.log('Initializing Blockly workspace...');
-
-      // Define dark theme
-      const darkTheme = Blockly.Theme.defineTheme('dark', {
-        name: 'dark',
-        base: Blockly.Themes.Classic,
-        componentStyles: {
-          workspaceBackgroundColour: '#1F2937',
-          toolboxBackgroundColour: '#111827',
-          toolboxForegroundColour: '#D1D5DB',
-          flyoutBackgroundColour: '#1F2937',
-          flyoutForegroundColour: '#D1D5DB',
-          flyoutOpacity: 0.9,
-          scrollbarColour: '#4B5563',
-          insertionMarkerColour: '#4ADE80',
-          insertionMarkerOpacity: 0.3,
-          scrollbarOpacity: 0.4,
-          cursorColour: '#D1D5DB',
-        }
-      });
-      
-      // Create workspace
       const workspace = Blockly.inject(blocklyDiv.current, {
         toolbox: toolboxCategories,
         theme: darkTheme,
-        grid: {
-          spacing: 20,
-          length: 3,
-          colour: '#ccc',
-          snap: true,
-        },
-        zoom: {
-          controls: true,
-          wheel: true,
-          startScale: 1.0,
-          maxScale: 3,
-          minScale: 0.3,
-          scaleSpeed: 1.2,
-        },
-        trashcan: true,
-        move: {
-          scrollbars: {
-            horizontal: true,
-            vertical: true
-          },
-          drag: true,
-          wheel: true
-        }
+        ...workspaceConfig
       });
 
       workspaceRef.current = workspace;
 
-      // Add change listener
+      // Handle initial XML loading
+      if (initialXml) {
+        try {
+          Blockly.Xml.domToWorkspace(
+            Blockly.Xml.textToDom(initialXml),
+            workspace
+          );
+        } catch (e) {
+          console.error('Error loading initial XML:', e);
+        }
+      }
+
+      // Add workspace change listener
       workspace.addChangeListener((event: Blockly.Events.Abstract) => {
         if (event.type !== Blockly.Events.FINISHED_LOADING) {
           onWorkspaceChange(workspace);
         }
       });
 
-      if (initialXml) {
-        try {
-          const xml = Blockly.Xml.textToDom(initialXml);
-          Blockly.Xml.domToWorkspace(xml, workspace);
-        } catch (e) {
-          console.error('Error loading initial XML:', e);
-        }
-      }
+      // Add flyout animation handlers
+      const addFlyoutAnimations = () => {
+        const flyouts = document.getElementsByClassName('blocklyFlyout');
+        Array.from(flyouts).forEach(flyout => {
+          if (flyout instanceof HTMLElement) {
+            flyout.style.transition = 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+            
+            // Create motion element wrapper
+            const motionWrapper = document.createElement('div');
+            motionWrapper.style.position = 'absolute';
+            motionWrapper.style.top = '0';
+            motionWrapper.style.left = '0';
+            motionWrapper.style.width = '100%';
+            motionWrapper.style.height = '100%';
+            
+            // Move the flyout into the motion wrapper
+            flyout.parentNode?.insertBefore(motionWrapper, flyout);
+            motionWrapper.appendChild(flyout);
+            
+            // Add animation class
+            const animated = motion(motionWrapper);
+            Object.assign(animated.style, {
+              position: 'absolute',
+              top: '0',
+              left: '0',
+              width: '100%',
+              height: '100%'
+            });
+          }
+        });
+      };
+
+      // Initialize animations after a short delay to ensure DOM is ready
+      setTimeout(addFlyoutAnimations, 100);
 
     } catch (error) {
       console.error('Error initializing Blockly:', error);
@@ -112,34 +107,7 @@ const BlocklyComponent: React.FC<BlocklyComponentProps> = ({
           overflow: 'hidden'
         }}
       />
-      <style>{`
-        .blocklyMainBackground {
-          fill: #1F2937 !important;
-        }
-        .blocklyToolboxDiv {
-          background-color: #111827 !important;
-          color: #D1D5DB !important;
-        }
-        .blocklyFlyoutBackground {
-          fill: #1F2937 !important;
-        }
-        .blocklyFlyout {
-          background-color: #1F2937 !important;
-        }
-        .blocklyScrollbarHandle {
-          fill: #4B5563 !important;
-        }
-        .blocklyScrollbarBackground {
-          fill: #374151 !important;
-        }
-        .blocklySelected > .blocklyPath {
-          stroke: #4ADE80 !important;
-          stroke-width: 3px !important;
-        }
-        .blocklyHighlightedConnectionPath {
-          stroke: #4ADE80 !important;
-        }
-      `}</style>
+      <style>{blocklyStyles}</style>
     </div>
   );
 };

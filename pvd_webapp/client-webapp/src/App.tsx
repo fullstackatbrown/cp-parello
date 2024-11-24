@@ -109,35 +109,29 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 flex flex-col">
-      <div className="w-full p-4">
-        <h1 className="text-2xl font-bold text-gray-100">
-          Blockly Grid Drawing
-        </h1>
-        
-        <div className="flex flex-col lg:flex-row gap-4 mt-4">
-          <div className="lg:w-1/3">
-            <h2 className="text-lg font-semibold mb-2 text-gray-300">
-              Grid Output (256 x 64)
-            </h2>
-            <div className="bg-gray-800 rounded-lg shadow-lg p-4">
-              <GridComponent grid={grid} />
-            </div>
-          </div>
-
-          <div className="lg:w-2/3">
-            <h2 className="text-lg font-semibold mb-2 text-gray-300">
-              Block Editor
-            </h2>
-            <div className="bg-gray-800 rounded-lg shadow-lg overflow-hidden border border-gray-700">
-              <BlocklyComponent
-                initialXml=""
-                toolboxCategories={toolboxConfiguration}
-                onWorkspaceChange={handleWorkspaceChange}
-              />
-            </div>
+    <div className="min-h-screen bg-gray-900 flex flex-col p-4 gap-4">
+      {/* Grid Section */}
+      <div className="w-full bg-gray-800 rounded-lg shadow-lg p-4">
+        <h2 className="text-lg font-semibold mb-4 text-gray-300">
+          Grid Output (256 x 64)
+        </h2>
+        <div className="w-full overflow-x-auto">
+          <div className="min-w-[1280px]"> {/* Force minimum width */}
+            <GridComponent grid={grid} />
           </div>
         </div>
+      </div>
+
+      {/* Blockly Section */}
+      <div className="w-full bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+        <h2 className="text-lg font-semibold p-4 text-gray-300">
+          Block Editor
+        </h2>
+        <BlocklyComponent
+          initialXml=""
+          toolboxCategories={toolboxConfiguration}
+          onWorkspaceChange={handleWorkspaceChange}
+        />
       </div>
     </div>
   );

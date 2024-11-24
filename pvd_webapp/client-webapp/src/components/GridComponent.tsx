@@ -19,8 +19,8 @@ const GridComponent: React.FC<GridComponentProps> = ({ grid }) => {
         className="grid gap-0"
         style={{ 
           display: 'grid',
-          gridTemplateColumns: 'repeat(256, 5px)',
-          gridTemplateRows: 'repeat(64, 5px)',
+          gridTemplateColumns: `repeat(${grid[0].length}, 8px)`, // Increased from 5px to 8px
+          gridTemplateRows: `repeat(${grid.length}, 8px)`, // Increased from 5px to 8px
           width: 'fit-content'
         }}
       >
@@ -28,7 +28,7 @@ const GridComponent: React.FC<GridComponentProps> = ({ grid }) => {
           row.map((cell, x) => (
             <div
               key={`${x}-${y}`}
-              className={`w-[5px] h-[5px] ${cell ? 'bg-white' : 'bg-black'}`}
+              className={`w-[8px] h-[8px] border border-gray-900 ${cell ? 'bg-white' : 'bg-black'}`}
             />
           ))
         )}
